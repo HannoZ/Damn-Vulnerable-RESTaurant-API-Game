@@ -53,9 +53,10 @@ def update_current_user_details(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Session = Depends(get_db),
 ):
-    db_user = update_user(db, user.username, user)
+    if user.username == current_user.username:    
+        db_user = update_user(db, user.username, user)
 
-    return current_user
+    return db_user
 
 
 @router.post(

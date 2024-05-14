@@ -7,6 +7,11 @@ from fastapi import HTTPException
 
 
 def _image_url_to_base64(image_url: str):
+    if image_url.startswith("http://localhost"):
+        raise HTTPException(status_code=403, detail="Invalid image URL")
+    if not image_url.endswith((".jpg", ".jpeg", ".png", ".gif")):
+        raise HTTPException(status_code=403, detail="Only images are allowed")
+
     response = requests.get(image_url)
     return base64.b64encode(response.content).decode()
 
