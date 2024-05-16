@@ -4,12 +4,22 @@ import requests
 from apis.menu import schemas
 from db.models import MenuItem
 from fastapi import HTTPException
-
+from urllib.parse import urlparse
 
 def _image_url_to_base64(image_url: str):
-    if image_url.startswith("http://localhost"):
+
+    # Parse the URL to analyse it
+    urlInfo = urlparse(image_url)
+    if not urlInfo.scheme in ["http", "https"]:
+        raise HTTPException(status_code=403, detail="Only HTTP and HTTPS URLs are allowed")
+    
+    # verify that the domain is whitelisted
+    whitelist = ["localhost"] # and any other domains you want to allow (in real-world scenarios, this should be a configuation setting)
+    if not urlInfo.netloc in whitelist:
         raise HTTPException(status_code=403, detail="Invalid image URL")
-    if not image_url.endswith((".jpg", ".jpeg", ".png", ".gif")):
+
+    # verify most common image formats by looking at the path part of the URL (to prevent urls like http://example.com/evil.php?image=evil.jpg)
+    if not urlInfo.path.endswith((".jpg", ".jpeg", ".png", ".gif", "svg", "webp")):
         raise HTTPException(status_code=403, detail="Only images are allowed")
 
     response = requests.get(image_url)

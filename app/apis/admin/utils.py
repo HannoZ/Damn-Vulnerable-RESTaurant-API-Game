@@ -1,16 +1,12 @@
 import subprocess
-import shlex
 
 def get_disk_usage(parameters: str):
 
-    # Use shlex.quote to safely create a string that can be used as one token in a shell command
-    safe_user_input = shlex.quote(parameters)
-
-    command = f'df -h {safe_user_input}'
+    # Use a list for the command instead of a string
+    command = ['df', '-h', parameters]
+    
     try:
-        result = subprocess.run(
-            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-        )
+        result = subprocess.check_output(command, shell=False)
         usage = result.stdout.strip().decode()
     except:
         raise Exception("An unexpected error was observed")
